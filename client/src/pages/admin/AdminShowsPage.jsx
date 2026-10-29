@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import api from '../../api/axios';
 import LoadingSpinner from '../../components/LoadingSpinner';
+import { formatRuntime } from '../../utils/formatRuntime';
 import { toast } from 'react-toastify';
 import { Calendar, Plus, Trash2, Clock, MapPin, Film, Search } from 'lucide-react';
 
@@ -152,7 +153,7 @@ const AdminShowsPage = () => {
                     <td>
                       <div className="fw-bold">{show.movieId?.title}</div>
                       <span className="text-muted" style={{ fontSize: '0.75rem' }}>
-                        {show.movieId?.duration} mins
+                        {formatRuntime(show.movieId?.runtimeMinutes || show.movieId?.duration) || `${show.movieId?.duration || 0} mins`}
                       </span>
                     </td>
                     <td>

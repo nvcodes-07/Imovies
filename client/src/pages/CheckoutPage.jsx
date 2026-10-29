@@ -4,6 +4,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { resetBookingState } from '../redux/slices/bookingSlice';
 import api from '../api/axios';
 import { toast } from 'react-toastify';
+import MoviePoster from '../components/MoviePoster';
 import {
   CreditCard,
   Smartphone,
@@ -280,16 +281,15 @@ const CheckoutPage = () => {
             <h5 className="fw-bold mb-3">Order Details</h5>
 
             <div className="d-flex gap-3 mb-3 pb-3 border-bottom">
-              <img
-                src={
-                  activeShow.movieId?.posterUrl?.startsWith('/uploads')
-                    ? `http://localhost:5001${activeShow.movieId.posterUrl}`
-                    : activeShow.movieId?.posterUrl || 'https://images.unsplash.com/photo-1534447677768-be436bb09401'
-                }
-                alt={activeShow.movieId?.title}
-                className="rounded-2 border"
-                style={{ width: '60px', height: '80px', objectFit: 'cover' }}
-              />
+              <div style={{ width: '60px', height: '80px', flexShrink: 0 }}>
+                <MoviePoster
+                  src={activeShow.movieId?.posterUrl}
+                  title={activeShow.movieId?.title}
+                  aspectRatio="2 / 3"
+                  rounded="rounded-2"
+                  alt={activeShow.movieId?.title}
+                />
+              </div>
               <div>
                 <h6 className="fw-bold mb-1">{activeShow.movieId?.title}</h6>
                 <p className="text-muted small mb-1">{activeShow.theatreId?.name}</p>

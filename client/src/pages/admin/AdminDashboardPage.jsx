@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../../api/axios';
 import LoadingSpinner from '../../components/LoadingSpinner';
+import MoviePoster from '../../components/MoviePoster';
 import {
   Film,
   Building,
@@ -242,16 +243,15 @@ const AdminDashboardPage = () => {
                     <span className="fw-bold fs-5 text-muted" style={{ width: '20px' }}>
                       #{idx + 1}
                     </span>
-                    <img
-                      src={
-                        tm.posterUrl?.startsWith('/uploads')
-                          ? `http://localhost:5001${tm.posterUrl}`
-                          : tm.posterUrl || 'https://images.unsplash.com/photo-1534447677768-be436bb09401'
-                      }
-                      alt={tm.title}
-                      className="rounded border"
-                      style={{ width: '40px', height: '52px', objectFit: 'cover' }}
-                    />
+                    <div style={{ width: '40px', height: '56px', flexShrink: 0 }}>
+                      <MoviePoster
+                        src={tm.posterUrl}
+                        title={tm.title}
+                        aspectRatio="2 / 3"
+                        rounded="rounded"
+                        alt={tm.title}
+                      />
+                    </div>
                     <div className="flex-grow-1">
                       <h6 className="fw-bold mb-0 small text-truncate" style={{ maxWidth: '140px' }}>
                         {tm.title}

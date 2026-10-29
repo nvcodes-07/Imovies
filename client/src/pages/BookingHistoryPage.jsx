@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import api from '../api/axios';
 import LoadingSpinner from '../components/LoadingSpinner';
 import EmptyState from '../components/EmptyState';
+import MoviePoster from '../components/MoviePoster';
 import { toast } from 'react-toastify';
 import {
   Ticket,
@@ -118,16 +119,15 @@ const BookingHistoryPage = () => {
                 <div className="row g-3 align-items-center">
                   {/* Poster Thumbnail */}
                   <div className="col-4 col-sm-3 col-md-2 text-center">
-                    <img
-                      src={
-                        booking.movieId?.posterUrl?.startsWith('/uploads')
-                          ? `http://localhost:5001${booking.movieId.posterUrl}`
-                          : booking.movieId?.posterUrl || 'https://images.unsplash.com/photo-1534447677768-be436bb09401'
-                      }
-                      alt={booking.movieId?.title}
-                      className="img-fluid rounded border"
-                      style={{ maxHeight: '130px', objectFit: 'cover' }}
-                    />
+                    <div style={{ maxWidth: '90px', margin: '0 auto' }}>
+                      <MoviePoster
+                        src={booking.movieId?.posterUrl}
+                        title={booking.movieId?.title}
+                        aspectRatio="2 / 3"
+                        rounded="rounded"
+                        alt={booking.movieId?.title}
+                      />
+                    </div>
                   </div>
 
                   {/* Booking Details */}

@@ -267,3 +267,128 @@ describe('3. Booking and Double-Booking Prevention', () => {
     expect(res.body.success).toBe(false);
   });
 });
+
+describe('4. Movie Metadata, Trailer, and Admin Management', () => {
+  let createdMovieId;
+
+  it('should successfully create a movie with authentic poster, trailer, runtime, cast and certification', async () => {
+    const res = await request(app)
+      .post('/api/movies')
+      .set('Authorization', `Bearer ${adminToken}`)
+      .send({
+        title: 'Inception 2: Dreamverse',
+        synopsis: 'A mind-bending heist thriller through subconscious reality.',
+        genre: ['Sci-Fi', 'Action'],
+        language: 'English',
+        runtimeMinutes: 148,
+        certification: 'U/A 16+',
+        director: 'Christopher Nolan',
+        releaseDate: '2026-11-20',
+        posterUrl: 'https://image.tmdb.org/t/p/w500/8Gxv8gSFCU0XGDykEGv7zR1n2ua.jpg',
+        trailerUrl: 'https://www.youtube.com/watch?v=YoHD9XEInc0',
+        cast: [
+          { name: 'Leonardo DiCaprio', character: 'Dom Cobb' },
+          { name: 'Joseph Gordon-Levitt', character: 'Arthur' },
+        ],
+        status: 'coming_soon',
+      });
+
+    expect(res.statusCode).toBe(201);
+    expect(res.body.success).toBe(true);
+    expect(res.body.movie.title).toBe('Inception 2: Dreamverse');
+    expect(res.body.movie.runtimeMinutes).toBe(148);
+    expect(res.body.movie.duration).toBe(148);
+    expect(res.body.movie.director).toBe('Christopher Nolan');
+    expect(res.body.movie.certification).toBe('U/A 16+');
+    expect(res.body.movie.trailerUrl).toBe('https://www.youtube.com/watch?v=YoHD9XEInc0');
+    expect(res.body.movie.cast[0].character).toBe('Dom Cobb');
+    createdMovieId = res.body.movie._id;
+  });
+
+  it('should reject movie creation with an invalid YouTube trailer URL', async () => {
+    const res = await request(app)
+      .post('/api/movies')
+      .set('Authorization', `Bearer ${adminToken}`)
+      .send({
+        title: 'Broken Trailer Movie',
+        synopsis: 'Test synopsis',
+        genre: ['Action'],
+        language: 'English',
+        runtimeMinutes: 120,
+        releaseDate: '2026-11-20',
+        posterUrl: 'https://image.tmdb.org/t/p/w500/8Gxv8gSFCU0XGDykEGv7zR1n2ua.jpg',
+        trailerUrl: 'https://notyoutube.com/fake-trailer-video',
+      });
+
+    expect(res.statusCode).toBe(400);
+    expect(res.body.success).toBe(false);
+    expect(res.body.errors.trailerUrl).toBeDefined();
+  });
+
+  it('should reject movie creation with negative or zero runtime', async () => {
+    const res = await request(app)
+      .post('/api/movies')
+      .set('Authorization', `Bearer ${adminToken}`)
+      .send({
+        title: 'Zero Runtime Movie',
+        synopsis: 'Test synopsis',
+        genre: ['Action'],
+        language: 'English',
+        runtimeMinutes: 0,
+        releaseDate: '2026-11-20',
+        posterUrl: 'https://image.tmdb.org/t/p/w500/8Gxv8gSFCU0XGDykEGv7zR1n2ua.jpg',
+      });
+
+    expect(res.statusCode).toBe(400);
+    expect(res.body.success).toBe(false);
+    expect(res.body.errors.runtimeMinutes).toBeDefined();
+  });
+
+  it('should reject movie creation when required fields are missing', async () => {
+    const res = await request(app)
+      .post('/api/movies')
+      .set('Authorization', `Bearer ${adminToken}`)
+      .send({
+        language: 'English',
+      });
+
+    expect(res.statusCode).toBe(400);
+    expect(res.body.success).toBe(false);
+    expect(res.body.errors.title).toBeDefined();
+    expect(res.body.errors.synopsis).toBeDefined();
+  });
+
+  it('should allow admin to update movie trailer, runtime, and cast', async () => {
+    const res = await request(app)
+      .put(`/api/movies/${createdMovieId}`)
+      .set('Authorization', `Bearer ${adminToken}`)
+      .send({
+        trailerUrl: 'https://youtu.be/8hP9D6kZseM',
+        runtimeMinutes: 155,
+        director: 'Christopher Nolan & Team',
+      });
+
+    expect(res.statusCode).toBe(200);
+    expect(res.body.success).toBe(true);
+    expect(res.body.movie.runtimeMinutes).toBe(155);
+    expect(res.body.movie.duration).toBe(155);
+    expect(res.body.movie.director).toBe('Christopher Nolan & Team');
+  });
+
+  it('should forbid non-admin users from creating movies', async () => {
+    const res = await request(app)
+      .post('/api/movies')
+      .set('Authorization', `Bearer ${userToken}`)
+      .send({
+        title: 'Unauthorized Movie',
+        synopsis: 'This should be blocked',
+        genre: ['Comedy'],
+        language: 'English',
+        runtimeMinutes: 90,
+        releaseDate: '2026-12-01',
+        posterUrl: 'https://image.tmdb.org/t/p/w500/8Gxv8gSFCU0XGDykEGv7zR1n2ua.jpg',
+      });
+
+    expect(res.statusCode).toBe(403);
+  });
+});
